@@ -2,7 +2,7 @@
 /**
  * geoPins Custom Post Type
  * Plugin Name: geo-pins-data-input
- * Plugin URI:  http://github.com/bonjourworld/geo-pins-data-input
+ * Plugin URI:  http://github.com/bonjourworld/jr-wp-data-input-plugin
  * Description: Creates a custom post type and enables custom data input saving by creating WP metaboxes
  * Version:     1.0.0
  * Author:      James Roussel
@@ -10,10 +10,12 @@
  * Text Domain: geoPin-post-type
  */
 
+
 // If this file is called directly, die!
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 // Required files for registering the post type and taxonomies.
+require plugin_dir_path( __FILE__ ) . 'includes/geopins-post-type.php';
 require plugin_dir_path( __FILE__ ) . 'includes/geopins-metaboxes.php';
 
 // Instantiate registration class, so we can add it as a dependency to main plugin class.
@@ -27,6 +29,27 @@ register_activation_hook( __FILE__, array( $post_type, 'activate' ) );
 
 // Initialize registrations for post-activation requests.
 $post_type_registrations->init();
+
+register_activation_hook( __FILE__ , 'your_rewrite_rules' );
+
+function your_rewrite_rules() {
+    // // json data pages
+    $base_url = "api";
+	// create rewrite rules
+    add_rewrite_rule(
+        $base_url.'/list/?',
+        substr( plugin_dir_path( __FILE__ ), 1 ) . 'data/list.php',
+        'top'
+    );
+
+    $base_url2 = "map";
+     add_rewrite_rule(
+        $base_url2,
+        substr( plugin_dir_path( __FILE__ ), 1 ) . 'map/map.php',
+        'top'
+    );
+    flush_rewrite_rules();
+}
 
 // Initialize metaboxes
 $post_type_metaboxes = new Geopin_Post_Type_Metaboxes;
@@ -46,7 +69,13 @@ if ( is_admin() ) {
 
 	require plugin_dir_path( __FILE__ ) . 'includes/class-post-type-admin.php';
 
+	
+
 	$post_type_admin = new Geopin_Post_Type_Admin( $post_type_registrations );
+
 	$post_type_admin->init();
+
+	
+
 
 }
